@@ -1,31 +1,34 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as f
 import torch.optim as optim
 
 from PIL import Image
 import torchvision.transforms as transforms
 import copy
 import torchvision.models as models
+
+
+# Loss content image
 class ContentLoss(nn.Module):
     def __init__(self, target):
         super(ContentLoss, self).__init__()
         self.target = target.detach()
 
     def forward(self, input):
-        self.loss = F.mse_loss(input, self.target)
+        self.loss = f.mse_loss(input, self.target)
         return input
 
-
+# Loss style image
 class StyleLoss(nn.Module):
-    def __init__(self, target_feature, instance):
+    def __init__(self, target_features, instance):
         super(StyleLoss, self).__init__()
         self.instance = instance
-        self.target = instance.gram_matrix(target_feature).detach()
+        self.target = self.instance.gram_matrix(target_features).detach()
 
     def forward(self, input):
         G = self.instance.gram_matrix(input)
-        self.loss = F.mse_loss(G, self.target)
+        self.loss = (f.mse_loss(G, self.target))
         return input
 
 class Normalization(nn.Module):
@@ -40,22 +43,18 @@ class Normalization(nn.Module):
 class StyleTransfer:
     def __init__(self, style_image, content_image):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.n = max(Image.open(content_image).size)/min(Image.open(content_image).size)
+        self.n = Image.open(content_image).size[0]/Image.open(content_image).size[1]
         self.style_img = self.image_loader(style_image)
         self.content_img = self.image_loader(content_image)
         self.cnn = models.vgg19(pretrained=True).features.to(self.device).eval()
         self.cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
-        self.content_layers_default = [ 'conv_1',]
+        self.content_layers_default = ['conv_1']
         self.style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 
-    def image_loader(self, img_path, max_size=256):
+    def image_loader(self, img_path, size=256):
         image = Image.open(img_path).convert('RGB')
-        if max(image.size) > max_size:
-            size = max_size
-        else:
-            size = max(image.size)
 
         loader = transforms.Compose([
             transforms.Resize((size, int(self.n*size))),
@@ -67,11 +66,12 @@ class StyleTransfer:
     def gram_matrix(self, input):
         a, b, c, d = input.size()
         features = input.view(a * b, c * d)
+
         G = torch.mm(features, features.t())
-        return G.div(float(a * b * c * d))
+        return G.div(a * b * c * d)
 
     def get_style_model_and_losses(self, cnn, normalization_mean, normalization_std,
-                                   style_img, content_img,
+                                   content_image, style_image,
                                    content_layers=None,
                                    style_layers=None):
         if content_layers is None:
@@ -81,8 +81,10 @@ class StyleTransfer:
 
         cnn = copy.deepcopy(cnn)
         normalization = Normalization(normalization_mean, normalization_std).to(self.device)
+
         content_losses = []
         style_losses = []
+
         model = nn.Sequential(normalization)
 
         i = 0
@@ -97,23 +99,21 @@ class StyleTransfer:
                 name = 'pool_{}'.format(i)
             elif isinstance(layer, nn.BatchNorm2d):
                 name = 'bn_{}'.format(i)
-            elif isinstance(layer, nn.Sequential):
-                name = 'conv_{}'.format(i)
             else:
-                name = 'unreq_{}'.format(i)
+                raise RuntimeError('Unrecognized layer: {}'.format(layer.__class__.__name__))
 
             model.add_module(name, layer)
 
             if name in content_layers:
-                target = model(content_img).detach()
+                target = model(content_image).detach()
                 content_loss = ContentLoss(target)
-                model.add_module("content_loss_{}".format(i), content_loss)
+                model.add_module('content_loss{}'.format(i), content_loss)
                 content_losses.append(content_loss)
 
             if name in style_layers:
-                target_feature = model(style_img).detach()
-                style_loss = StyleLoss(target_feature, self)
-                model.add_module("style_loss_{}".format(i), style_loss)
+                target = model(style_image).detach()
+                style_loss = StyleLoss(target, self)
+                model.add_module('style_loss{}'.format(i), style_loss)
                 style_losses.append(style_loss)
 
         for i in range(len(model) - 1, -1, -1):
@@ -122,26 +122,23 @@ class StyleTransfer:
 
         model = model[:(i + 1)]
 
-        return model, style_losses, content_losses
+        return model, content_losses, style_losses
 
     def get_input_optimizer(self, input_img):
-        optimizer = optim.LBFGS([input_img.requires_grad_()], lr=0.2)
+        optimizer = optim.LBFGS([input_img.requires_grad_()])
         return optimizer
 
     def run_style_transfer(self, cnn, normalization_mean, normalization_std,
-                           content_img, style_img, input_img, num_steps=100,
-                           style_weight=100000, content_weight=1):
+                           content_image, style_image, input_img,
+                           num_steps=100, style_weight=1000, content_weight=1):
 
-        print('Building the style transfer model..')
+        model, content_losses, style_losses = self.get_style_model_and_losses(cnn, normalization_mean, normalization_std,
+                                                                            content_image, style_image)
 
-        model, style_losses, content_losses = self.get_style_model_and_losses(cnn,
-            normalization_mean, normalization_std, style_img, content_img)
         optimizer = self.get_input_optimizer(input_img)
 
-        print('Optimizing..')
         run = [0]
         while run[0] <= num_steps:
-
             def closure():
                 input_img.data.clamp_(0, 1)
 
@@ -179,12 +176,13 @@ class StyleTransfer:
     def get_output(self):
         input_img = self.content_img.detach()
         output_img = self.run_style_transfer(self.cnn, self.cnn_normalization_mean, self.cnn_normalization_std,
-                            self.content_img, self.style_img, input_img)
+                                             self.content_img, self.style_img, input_img)
 
         unloader = transforms.ToPILImage(mode='RGB')
-        image = output_img.clone()
+        image = output_img.cpu().clone()
         image = image.squeeze(0)
         image = unloader(image)
 
         return image
+
 

@@ -1,11 +1,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.autograd import Variable
 from PIL import Image
 
-# define Gram Matrix
+
 class GramMatrix(nn.Module):
     def forward(self, y):
         (b, ch, h, w) = y.size()
@@ -14,7 +13,6 @@ class GramMatrix(nn.Module):
         gram = features.bmm(features_t) / (ch * h * w)
         return gram
 
-# proposed Inspiration(CoMatch) Layer
 class Inspiration(nn.Module):
 
     def __init__(self, C, B=1):
@@ -42,8 +40,6 @@ class Inspiration(nn.Module):
         return self.__class__.__name__ + '(' \
                + 'N x ' + str(self.C) + ')'
 
-
-# some basic layers, with reflectance padding
 class ConvLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super(ConvLayer, self).__init__()
@@ -55,7 +51,6 @@ class ConvLayer(torch.nn.Module):
         out = self.reflection_pad(x)
         out = self.conv2d(out)
         return out
-
 
 class UpsampleConvLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
@@ -75,7 +70,6 @@ class UpsampleConvLayer(torch.nn.Module):
             x = self.reflection_pad(x)
         out = self.conv2d(x)
         return out
-
 
 class Bottleneck(nn.Module):
 
@@ -105,7 +99,6 @@ class Bottleneck(nn.Module):
             residual = x
         return residual + self.conv_block(x)
 
-
 class UpBottleneck(nn.Module):
     def __init__(self, inplanes, planes, stride=2, norm_layer=nn.BatchNorm2d):
         super(UpBottleneck, self).__init__()
@@ -127,8 +120,6 @@ class UpBottleneck(nn.Module):
     def forward(self, x):
         return self.residual_layer(x) + self.conv_block(x)
 
-
-# the MSG-Net
 class Net(nn.Module):
     def __init__(self, input_nc=3, output_nc=3, ngf=64, norm_layer=nn.InstanceNorm2d, n_blocks=6, gpu_ids=[]):
         super(Net, self).__init__()
@@ -171,10 +162,10 @@ class Net(nn.Module):
     def forward(self, input):
         return self.model(input)
 
-class StyleTransfer2:
+class FastStyleTransfer:
     def __init__(self, content_image, style_image):
-        self.content_image = self.tensor_load_rgbimage(content_image, size=256, keep_asp=True).unsqueeze(0)
-        self.style_image = self.tensor_load_rgbimage(style_image, size=256).unsqueeze(0)
+        self.content_image = self.tensor_load_rgbimage(content_image, size=512, keep_asp=True).unsqueeze(0)
+        self.style_image = self.tensor_load_rgbimage(style_image, size=512).unsqueeze(0)
         self.style_image = self.preprocess_batch(self.style_image)
         self.style_model = Net(ngf=128)
         self.model_dict = torch.load('models/21styles.model')
@@ -226,5 +217,5 @@ class StyleTransfer2:
         content_image = Variable(self.preprocess_batch(self.content_image))
         self.style_model.setTarget(style_v)
         output = self.style_model(content_image)
-        self.tensor_save_bgrimage(output.data[0], 'output.jpg', False)
+        self.tensor_save_bgrimage(output.data[0], 'results/output.jpg', False)
 
