@@ -38,13 +38,6 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
-
-async def on_shutdown(dp):
-    await bot.delete_webhook()
-    await dp.storage.close()
-    await dp.storage.wait_close()
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.message):
@@ -59,6 +52,14 @@ async def send_welcome(message: types.message):
     for text in texts:
         await message.answer(text)
         await asyncio.sleep(0.5)
+
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+
+async def on_shutdown(dp):
+    await bot.delete_webhook()
+    await dp.storage.close()
+    await dp.storage.wait_close()
 
 
 @dp.message_handler(commands=['mode'])
