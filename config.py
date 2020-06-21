@@ -5,7 +5,7 @@ PROXY_URL = 'socks5://178.128.203.1:1080'
 PROXY_LOGIN = 'student'
 PROXY_PW = 'TH8FwlMMwWvbJF8FYcq0'
 WEBHOOK_HOST = '35.188.31.213/'
-WEBHOOK_PATH = f'{BOT_TOKEN}'
+WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
 
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.environ.get('PORT', '8443'))
