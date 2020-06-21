@@ -51,7 +51,7 @@ async def send_welcome(message: types.message):
     for text in texts:
         await message.answer(text)
         await asyncio.sleep(0.5)
-
+'''
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
 
@@ -59,7 +59,7 @@ async def on_shutdown(dp):
     logging.warning('Shutting down..')
     await bot.delete_webhook()
     logging.warning('Bye!')
-
+'''
 
 
 @dp.message_handler(commands=['mode'])
@@ -238,8 +238,8 @@ async def cartoon_style(message: types.message, state: FSMContext):
 
 
 def main():
-    #start_polling(dp, skip_updates=True)
-
+    start_polling(dp, skip_updates=True)
+'''
     start_webhook(dispatcher=dp,
                   webhook_path=WEBHOOK_PATH,
                   on_startup=on_startup,
@@ -248,7 +248,7 @@ def main():
                   host=WEBAPP_HOST,
                   port=WEBAPP_PORT,
                   )
-
+'''
 
 if __name__ == '__main__':
     main()
