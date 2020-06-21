@@ -46,10 +46,10 @@ class StyleTransfer:
         self.n = Image.open(content_image).size[0]/Image.open(content_image).size[1]
         self.style_img = self.image_loader(style_image)
         self.content_img = self.image_loader(content_image)
-        self.cnn = models.alexnet(pretrained=True).features.to(self.device).eval()
+        self.cnn = models.vgg19(pretrained=True).features.to(self.device).eval()
         self.cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
-        self.content_layers_default = ['conv_4']
+        self.content_layers_default = ['conv_1']
         self.style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 
@@ -130,7 +130,7 @@ class StyleTransfer:
 
     def run_style_transfer(self, cnn, normalization_mean, normalization_std,
                            content_image, style_image, input_img,
-                           num_steps=200, style_weight=1000, content_weight=1):
+                           num_steps=100, style_weight=1000, content_weight=1):
 
         model, content_losses, style_losses = self.get_style_model_and_losses(cnn, normalization_mean, normalization_std,
                                                                             content_image, style_image)

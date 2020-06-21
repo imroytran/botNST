@@ -32,15 +32,14 @@ class Images(StatesGroup):
     style_img = State()
     GAN_img = State()
 
-#bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
+#bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
 async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL,
-                          certificate=open(WEBHOOK_SSL_CERT, 'rb'))
+    await bot.set_webhook(WEBHOOK_URL)
 
 async def on_shutdown(dp):
     await bot.delete_webhook()
@@ -237,10 +236,7 @@ async def cartoon_style(message: types.message, state: FSMContext):
     await message.answer('For next style transfer, type /mode and select working mode!')
 
 
-
-if __name__ == '__main__':
-    #start_polling(dp, skip_updates=True)
-
+def main():
     start_webhook(dispatcher=dp,
                   webhook_path=WEBHOOK_PATH,
                   on_startup=on_startup,
@@ -249,3 +245,6 @@ if __name__ == '__main__':
                   host=WEBAPP_HOST,
                   port=WEBAPP_PORT,
                   )
+
+if __name__ == '__main__':
+    main()
