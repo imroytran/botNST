@@ -1,1 +1,1 @@
-web: python3 bot.py --timeout 1200
+web: python3 main.py --timeout 1200
