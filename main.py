@@ -34,9 +34,8 @@ class Images(StatesGroup):
 
 #bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=BOT_TOKEN)
-storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
 
+dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=['start'])
@@ -57,9 +56,10 @@ async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
 
 async def on_shutdown(dp):
+    logging.warning('Shutting down..')
     await bot.delete_webhook()
-    await dp.storage.close()
-    await dp.storage.wait_close()
+    logging.warning('Bye!')
+
 
 
 @dp.message_handler(commands=['mode'])
