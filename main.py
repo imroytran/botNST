@@ -32,8 +32,8 @@ class Images(StatesGroup):
     style_img = State()
     GAN_img = State()
 
-bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
-#bot = Bot(token=BOT_TOKEN)
+#bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
+bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
