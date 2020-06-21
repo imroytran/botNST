@@ -35,7 +35,7 @@ class Images(StatesGroup):
 #bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=BOT_TOKEN)
 
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 @dp.message_handler(commands=['start'])
