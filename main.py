@@ -237,8 +237,8 @@ async def cartoon_style(message: types.message, state: FSMContext):
 
 
 def main():
-    start_polling(dp, skip_updates=True)
-    '''
+    #start_polling(dp, skip_updates=True)
+
     start_webhook(dispatcher=dp,
                   webhook_path=WEBHOOK_PATH,
                   on_startup=on_startup,
@@ -247,7 +247,7 @@ def main():
                   host=WEBAPP_HOST,
                   port=WEBAPP_PORT,
                   )
-                  '''
+
 
 if __name__ == '__main__':
     main()
