@@ -17,7 +17,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 import torchvision.utils as vutils
 from config import BOT_TOKEN, PROXY_LOGIN, PROXY_PW, PROXY_URL
-from config import WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_HOST, WEBHOOK_PATH, WEBHOOK_URL
+from config import WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_HOST, WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SSL_CERT
 from keyboards import menu, exam_style_kb, examples_style, workmode, cartoon_styles, cartoon_styles_kb
 
 
@@ -32,15 +32,15 @@ class Images(StatesGroup):
     style_img = State()
     GAN_img = State()
 
-bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
-#bot = Bot(token=BOT_TOKEN)
+#bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
+bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL,
-                          certificate=open('certificate/url_cert.pem', 'r'))
+                          certificate=open(WEBHOOK_SSL_CERT, 'rb'))
 
 async def on_shutdown(dp):
     await bot.delete_webhook()
@@ -142,7 +142,7 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery, state:FS
     async with state.proxy() as data:
         data['style_img'] = 'data/{}.jpg'.format(answer_data)
     await bot.send_message(query.from_user.id, 'You selected {}'.format(answer_data))
-
+    await bot.send_message(query.from_user.id, 'Waiting...')
     data = await state.get_data()
     content_image = data.get('content_img')
     style_image = data.get('style_img')
@@ -239,8 +239,8 @@ async def cartoon_style(message: types.message, state: FSMContext):
 
 
 if __name__ == '__main__':
-    start_polling(dp, skip_updates=True)
-'''
+    #start_polling(dp, skip_updates=True)
+
     start_webhook(dispatcher=dp,
                   webhook_path=WEBHOOK_PATH,
                   on_startup=on_startup,
@@ -249,4 +249,3 @@ if __name__ == '__main__':
                   host=WEBAPP_HOST,
                   port=WEBAPP_PORT,
                   )
-'''
