@@ -64,6 +64,7 @@ async def choice(message: types.message):
     await message.answer('Select the working mode with the popup keyboards!', reply_markup=menu)
     await Images.mode.set()
 
+# Create command /cancel
 @dp.message_handler(state="*", commands=['cancel'])
 @dp.message_handler(Text(equals='cancel', ignore_case=True), state="*")
 async def cancel(message: types.message, state:FSMContext):
@@ -73,6 +74,7 @@ async def cancel(message: types.message, state:FSMContext):
     await state.finish()
     await message.answer('Canceled!', reply_markup=ReplyKeyboardRemove())
 
+# Save option to state
 @dp.message_handler(Text(equals=workmode), state=Images.mode)
 async def get_routine(message: types.message, state:FSMContext):
     await asyncio.sleep(.5)
@@ -92,7 +94,7 @@ async def get_routine(message: types.message, state:FSMContext):
         await asyncio.sleep(.5)
         await message.answer('Please send me a photo!')
 
-
+# save content image to state Images.content_image
 @dp.message_handler(content_types=['document', 'photo'], state=Images.content_img)
 async def download_if_send_as_file(message, state: FSMContext):
     if message.content_type == 'document':
@@ -116,7 +118,7 @@ async def download_if_send_as_file(message, state: FSMContext):
         for text in texts:
             await message.answer(text)
             await asyncio.sleep(0.2)
-
+        # Show examples style images
         for i in range(0, 8, 2):
             keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
             await types.ChatActions.upload_photo()
@@ -132,7 +134,7 @@ async def download_if_send_as_file(message, state: FSMContext):
         await message.answer('Select or send new style photo')
         await Images.style_img.set()
 
-
+# Make style transfer if selected style image from examples
 @dp.callback_query_handler(Text(equals=examples_style), state=Images.style_img)
 async def inline_kb_answer_callback_handler(query: types.CallbackQuery, state:FSMContext):
     answer_data = query.data
@@ -156,7 +158,7 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery, state:FS
     await asyncio.sleep(0.5)
     await bot.send_message(query.from_user.id, 'For next style transfer, type /mode and select working mode!')
 
-
+# Make style transfer if style image from device
 @dp.message_handler(content_types=['document', 'photo'], state=Images.style_img)
 async def download_if_send_as_file(message, state: FSMContext):
     if message.content_type == 'document':
@@ -193,7 +195,7 @@ async def download_if_send_as_file(message, state: FSMContext):
     await asyncio.sleep(0.5)
     await message.answer('For next style transfer, type /mode and select working mode!')
 
-
+# Make cartoonly style transfer for option GAN
 @dp.message_handler(content_types=['document', 'photo'], state=Images.GAN_img)
 async def download_if_send_as_file(message, state: FSMContext):
     if message.content_type == 'document':
