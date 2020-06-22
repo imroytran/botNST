@@ -12,4 +12,4 @@
 - **/mode**: режимы работы
 - **/cancel**: отмена работы
 
-## Бот деплойт на Google cloud platform и Heroku. 
+## Бот деплойт на Google Cloud Platform и Heroku. 
