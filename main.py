@@ -15,7 +15,11 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.executor import start_webhook, start_polling
 from aiogram.dispatcher.webhook import get_new_configured_app
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+<<<<<<< HEAD
 from aiogram.
+=======
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+>>>>>>> e811577e9f34b73da3b4aa58e1107c30e636fd16
 
 import torchvision.utils as vutils
 from config import BOT_TOKEN, PROXY_LOGIN, PROXY_PW, PROXY_URL
@@ -37,8 +41,8 @@ class Images(StatesGroup):
 #bot = Bot(token=BOT_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=BOT_TOKEN)
 
-dp = Dispatcher(bot)
-
+dp = Dispatcher(bot, storage=MemoryStorage())
+dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.message):
@@ -53,12 +57,20 @@ async def send_welcome(message: types.message):
     for text in texts:
         await message.answer(text)
         await asyncio.sleep(0.5)
-
+'''
 async def on_startup(dp):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
+<<<<<<< HEAD
 
+=======
+async def on_shutdown(dp):
+    logging.warning('Shutting down..')
+    await bot.delete_webhook()
+    logging.warning('Bye!')
+'''
+>>>>>>> e811577e9f34b73da3b4aa58e1107c30e636fd16
 
 
 @dp.message_handler(commands=['mode'])
@@ -237,8 +249,8 @@ async def cartoon_style(message: types.message, state: FSMContext):
 
 
 def main():
-    #start_polling(dp, skip_updates=True)
-
+    start_polling(dp, skip_updates=True)
+'''
     start_webhook(dispatcher=dp,
                   webhook_path=WEBHOOK_PATH,
                   on_startup=on_startup,
@@ -247,7 +259,7 @@ def main():
                   host=WEBAPP_HOST,
                   port=WEBAPP_PORT,
                   )
-
+'''
 
 if __name__ == '__main__':
     main()
