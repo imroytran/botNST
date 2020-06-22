@@ -46,7 +46,9 @@ class StyleTransfer:
         self.n = Image.open(content_image).size[0]/Image.open(content_image).size[1]
         self.style_img = self.image_loader(style_image)
         self.content_img = self.image_loader(content_image)
-        self.cnn = models.vgg19(pretrained=True).features.to(self.device).eval()
+        model = models.vgg19()
+        model.load_state_dict(torch.load('models/vgg19-dcbb9e9d.pth'))
+        self.cnn = model.features.to(self.device).eval()
         self.cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
         self.content_layers_default = ['conv_1']
