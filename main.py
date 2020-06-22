@@ -13,7 +13,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.executor import start_webhook, start_polling
+from aiogram.dispatcher.webhook import get_new_configured_app
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.
 
 import torchvision.utils as vutils
 from config import BOT_TOKEN, PROXY_LOGIN, PROXY_PW, PROXY_URL
@@ -53,12 +55,9 @@ async def send_welcome(message: types.message):
         await asyncio.sleep(0.5)
 
 async def on_startup(dp):
+    await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
-async def on_shutdown(dp):
-    logging.warning('Shutting down..')
-    await bot.delete_webhook()
-    logging.warning('Bye!')
 
 
 
