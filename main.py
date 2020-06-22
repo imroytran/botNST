@@ -14,6 +14,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.executor import start_webhook, start_polling
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 import torchvision.utils as vutils
 from config import BOT_TOKEN, PROXY_LOGIN, PROXY_PW, PROXY_URL
@@ -36,7 +37,7 @@ class Images(StatesGroup):
 bot = Bot(token=BOT_TOKEN)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
-
+dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.message):
