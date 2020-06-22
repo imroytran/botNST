@@ -1,1 +1,7 @@
+application: spherical-wave-270813
 runtime: python37
+
+
+handlers:
+- url: /.*
+  script: main.py
