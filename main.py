@@ -15,11 +15,7 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.executor import start_webhook, start_polling
 from aiogram.dispatcher.webhook import get_new_configured_app
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-<<<<<<< HEAD
-from aiogram.
-=======
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
->>>>>>> e811577e9f34b73da3b4aa58e1107c30e636fd16
 
 import torchvision.utils as vutils
 from config import BOT_TOKEN, PROXY_LOGIN, PROXY_PW, PROXY_URL
