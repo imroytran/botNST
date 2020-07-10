@@ -1,6 +1,6 @@
 # Telegram bot style transfer
 
-**Bot name: botNST_tranduchieu**
+**Bot name: @botNST_tranduchieu**
 
 ## У бота есть три выбора (в виде кнопок) режима работы:
 - **Style transfer**: Передает стиль с одной картинки (style image) на другую (content image). Работает по медленному алгоритму.
